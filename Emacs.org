@@ -1,49 +1,48 @@
 #+title: Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
-* Welcome!
+* Start-up 
 
 This file generates [[file:init.el][init.el]] which can be loaded by Emacs at startup.
 
 The following variables are used to tweak some of the configuration pieces for use in the live streams so you might need to adjust them for your local machine if you try to use this configuration directly.
 
 #+begin_src emacs-lisp
+  ;; The default is 800 kilobytes.  Measured in bytes.
+  (setq gc-cons-threshold (* 50 1000 1000))
 
-;; NOTE: init.el is now generated from Emacs.org.  Please edit that file
-;;       in Emacs and init.el will be generated automatically!
-(defvar efs/default-font-size 120)
-(defvar efs/default-variable-font-size 120)
+  ;; Profile emacs startup
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (message "*** Emacs loaded in %s with %d garbage collections."
+                       (format "%.2f seconds"
+                               (float-time
+                                (time-subtract after-init-time before-init-time)))
+                       gcs-done)))
+
+  (defvar efs/default-font-size 120)
+  (defvar efs/default-variable-font-size 120)
 #+end_src
 
-* Package System Setup
-
-Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+* Install straight.el
 
 #+begin_src emacs-lisp
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
 
-    ;; Initialize package sources
-    (require 'package)
-
-    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                             ("gnu" . "https://elpa.gnu.org/packages/")
-                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")
-                             ;;("org" . "https://orgmode.org/elpa/")
-                             ("elpa" . "https://elpa.gnu.org/packages/")))
-
-    (package-initialize)
-    (unless package-archive-contents
-      (package-refresh-contents))
-
-    ;;(assq-delete-all 'org package--builtins)
-    ;;(assq-delete-all 'org package--builtin-versions)
-
-    ;; Initialize use-package on non-Linux platforms
-    (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
-
-    (require 'use-package)
-    (setq use-package-always-ensure t)
-
+  (straight-use-package 'use-package)
+  (straight-use-package 'el-patch)
+  (setq straight-use-package-by-default t)
 #+end_src
 
 * Basic UI Configuration
@@ -196,34 +195,34 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 
 #+begin_src emacs-lisp
 
-    (use-package ivy
-      :diminish
-      :bind (("C-s" . swiper)
-             :map ivy-minibuffer-map
-             ("TAB" . ivy-alt-done)
-             ("C-l" . ivy-alt-done)
-             ("C-j" . ivy-next-line)
-             ("C-k" . ivy-previous-line)
-             :map ivy-switch-buffer-map
-             ("C-k" . ivy-previous-line)
-             ("C-l" . ivy-done)
-             ("C-d" . ivy-switch-buffer-kill)
-             :map ivy-reverse-i-search-map
-             ("C-k" . ivy-previous-line)
-             ("C-d" . ivy-reverse-i-search-kill))
-      :config
-      (ivy-mode 1))
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+	   :map ivy-minibuffer-map
+	   ("TAB" . ivy-alt-done)
+	   ("C-l" . ivy-alt-done)
+	   ("C-j" . ivy-next-line)
+	   ("C-k" . ivy-previous-line)
+	   :map ivy-switch-buffer-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-l" . ivy-done)
+	   ("C-d" . ivy-switch-buffer-kill)
+	   :map ivy-reverse-i-search-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
 
-    (use-package ivy-rich
-      :init
-      (ivy-rich-mode 1))
+  (use-package ivy-rich
+    :init
+    (ivy-rich-mode 1))
 
-    (use-package counsel
-      :bind (("C-M-j" . 'counsel-switch-buffer)
-             :map minibuffer-local-map
-             ("C-r" . 'counsel-minibuffer-history))
-      :config
-      (counsel-mode 1))
+  (use-package counsel
+    :bind (("C-M-j" . 'counsel-switch-buffer)
+	   :map minibuffer-local-map
+	   ("C-r" . 'counsel-minibuffer-history))
+    :config
+    (counsel-mode 1))
 
 #+end_src
 
@@ -318,7 +317,7 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (variable-pitch-mode 1)
     (visual-line-mode 1))
 
-  (use-package org :pin gnu
+  (use-package org 
     :hook (org-mode . efs/org-mode-setup)
     :config
     (setq org-ellipsis " ▾")
@@ -513,26 +512,6 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
 #+end_src
 
-* Org Mind Map
-#+begin_src emacs-lisp
-;; This is an Emacs package that creates graphviz directed graphs from
-;; the headings of an org file
-(use-package org-mind-map
-  :init
-  (require 'ox-org)
-  :ensure t
-  ;; Uncomment the below if 'ensure-system-packages` is installed
-  ;;:ensure-system-package (gvgen . graphviz)
-  :config
-  ;; (setq org-mind-map-engine "dot")       ; Default. Directed Graph
-   (setq org-mind-map-engine "neato")  ; Undirected Spring Graph
-  ;; (setq org-mind-map-engine "twopi")  ; Radial Layout
-  ;; (setq org-mind-map-engine "fdp")    ; Undirected Spring Force-Directed
-  ;; (setq org-mind-map-engine "sfdp")   ; Multiscale version of fdp for the layout of large graphs
-  ;;  (setq org-mind-map-engine "twopi")  ; Radial layouts
-  ;; (setq org-mind-map-engine "circo")  ; Circular Layout
-  )
-#+end_src
 * Development
 
 ** Languages
@@ -656,7 +635,7 @@ This will install the [[https://github.com/theia-ide/typescript-language-server]
 
 #+begin_src emacs-lisp
   (use-package python-mode
-    :ensure t
+    :straight t
     :hook (python-mode . lsp-deferred)
     :custom
     ;; NOTE: Set these if Python 3 is called "python3" on your system!
@@ -762,17 +741,17 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 This is an example of configuring another non-Emacs application using org-mode.  Not only do we write out the configuration at =.config/some-app/config=, we also compute the value that gets stored in this configuration from the Emacs Lisp block above it.
 
 #+NAME: the-value
-#+begin_src emacs-lisp :tangle no
++begin_src emacs-lisp :tangle no
 
   (+ 55 100)
 
-#+end_src
++end_src
 
-#+begin_src conf :tangle .config/some-app/config :noweb yes
++begin_src conf :tangle .config/some-app/config :noweb yes
 
   value=<<the-value()>>
 
-#+end_src
++end_src
 
 * Dashboard
 
@@ -886,7 +865,7 @@ This is an example of configuring another non-Emacs application using org-mode. 
 #+begin_src emacs-lisp
   ;; sudo apt-get install xclip
   (use-package org-download
-      :ensure t)
+      :straight t)
   (setq-default org-download-image-dir "~/RoamNotes/images/machineLearning/")
 #+end_src
 
@@ -894,7 +873,7 @@ This is an example of configuring another non-Emacs application using org-mode. 
 
 #+begin_src emacs-lisp
          (use-package org-roam
-           :ensure t
+           :straight t
            :custom
            (org-roam-directory "~/RoamNotes")
            (org-roam-completion-everywhere t)
@@ -923,11 +902,28 @@ This is an example of configuring another non-Emacs application using org-mode. 
            :config
            (org-roam-setup))
 
-         (add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
-         (load-library "org-roam-ui")
+         ;;(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
+         ;;(load-library "org-roam-ui")
 
          (setq browse-url-browser-function 'browse-url-generic
                browse-url-generic-program "/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe")
+#+end_src
+
+* Org-roam-ui
+
+#+begin_src emacs-lisp
+(use-package org-roam-ui
+  :straight (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  :after org-roam
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 #+end_src
 
 * DIRED
@@ -935,7 +931,7 @@ This is an example of configuring another non-Emacs application using org-mode. 
  #+begin_src emacs-lisp
 
    (use-package dired
-     :ensure nil
+     :straight nil
      :commands (dired dired-jump)
      :bind (("C-x C-j" . dired-jump))
      :custom ((dired-listing-switches "-agho --group-directories-first"))
@@ -1014,23 +1010,6 @@ This is an example of configuring another non-Emacs application using org-mode. 
 - =G= - Change file group
 - =S= - Create a symbolic link to this file
 - =L= - Load an Emacs Lisp file into Emacs
-* Install straight.el
-
-#+begin_src emacs-lisp
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-#+end_src
-
 * Perspective.el
 
 In Emacs, running =switch-to-buffer= or =ibuffer= shows you every single buffer that is open in Emacs which can be a little overwhelming in long-running Emacs sessions.
@@ -1084,7 +1063,46 @@ If you're done with a particular perspective, you can "kill" it using persp-kill
 * LaTex stuff
 
 #+begin_src emacs-lisp
-(setq org-latex-create-formula-image-program 'dvipng)
+  (setq org-latex-create-formula-image-program 'dvipng)
+  (plist-put org-format-latex-options :justify 'center)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+
+  (defun org-justify-fragment-overlay (beg end image imagetype)
+    "Adjust the justification of a LaTeX fragment.
+  The justification is set by :justify in
+  `org-format-latex-options'. Only equations at the beginning of a
+  line are justified."
+    (cond
+     ;; Centered justification
+     ((and (eq 'center (plist-get org-format-latex-options :justify)) 
+           (= beg (line-beginning-position)))
+      (let* ((img (create-image image 'imagemagick t))
+             (width (car (image-size img)))
+             (offset (floor (- (/ (window-text-width) 2) (/ width 2)))))
+        (overlay-put (ov-at) 'before-string (make-string offset ? ))))
+     ;; Right justification
+     ((and (eq 'right (plist-get org-format-latex-options :justify)) 
+           (= beg (line-beginning-position)))
+      (let* ((img (create-image image 'imagemagick t))
+             (width (car (image-display-size (overlay-get (ov-at) 'display))))
+             (offset (floor (- (window-text-width) width (- (line-end-position) end)))))
+        (overlay-put (ov-at) 'before-string (make-string offset ? ))))))
+
+  (defun org-latex-fragment-tooltip (beg end image imagetype)
+    "Add the fragment tooltip to the overlay and set click function to toggle it."
+    (overlay-put (ov-at) 'help-echo
+                 (concat (buffer-substring beg end)
+                         "mouse-1 to toggle."))
+    (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
+                                      (define-key map [mouse-1]
+                                        `(lambda ()
+                                           (interactive)
+                                           (org-remove-latex-fragment-image-overlays ,beg ,end)))
+                                      map)))
+
+  ;; advise the function to a
+  (advice-add 'org--format-latex-make-overlay :after 'org-justify-fragment-overlay)
+  (advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
 #+end_src
 
 
@@ -1098,16 +1116,11 @@ To disable it, simply use
 h(x) = \theta_0 + \theta_1 x
 \end{equation}
 
-#+begin_src emacs-lisp
-(use-package mathpix.el
-  :straight (:host github :repo "jethrokuan/mathpix.el")
-  :custom ((mathpix-app-id "app-id")
-           (mathpix-app-key "app-key"))
-  :bind
-  ("C-x m" . mathpix-screenshot))
-#+end_src
-* Image Sizes in Org Mode
+* Image in Org Mode
 
+#+begin_src emacs-lisp
+(setq org-startup-with-inline-images 1)
+#+end_src
 Here is a way to resize images in emacs Org mode for preview (not exporting). Typically,
 
 We want to set an image to a specific width like 249px when we need to.
@@ -1124,3 +1137,32 @@ Then, in your .org file, if you have
 / [~/images/example1.jpg] 
 
 then the image will be displayed in preview at width 249px. For another image, where no +attr_* is specified, the default width of 550px will be applied.
+* (Outdated) Package System Setup
+
+Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+
++begin_src emacs-lisp
+    ;; Initialize package sources
+    (require 'package)
+
+    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                             ("gnu" . "https://elpa.gnu.org/packages/")
+                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+                             ;;("org" . "https://orgmode.org/elpa/")
+                             ("elpa" . "https://elpa.gnu.org/packages/")))
+
+    (package-initialize)
+    (unless package-archive-contents
+      (package-refresh-contents))
+
+    ;;(assq-delete-all 'org package--builtins)
+    ;;(assq-delete-all 'org package--builtin-versions)
+
+    ;; Initialize use-package on non-Linux platforms
+    (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
+
+    (require 'use-package)
+    (setq use-package-always-ensure t)
++end_src
+
