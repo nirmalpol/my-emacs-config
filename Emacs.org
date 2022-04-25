@@ -26,6 +26,8 @@ The following variables are used to tweak some of the configuration pieces for u
 
 * Install straight.el
 
+Instead of using the package.el manager that is typically used, I opted to use [[https://github.com/raxod502/straight.el][straight.el]] to manage my packages because it directly downloads the repos from github and brings them to my system where I can make any edits if I desire.
+
 #+begin_src emacs-lisp
   (defvar bootstrap-version)
   (let ((bootstrap-file
@@ -47,7 +49,7 @@ The following variables are used to tweak some of the configuration pieces for u
 
 * Basic UI Configuration
 
-This section configures basic UI settings that remove unneeded elements to make Emacs look a lot more minimal and modern.  If you're just getting started in Emacs, the menu bar might be helpful so you can remove the =(menu-bar-mode -1)= line if you'd like to still see that.
+This section configures basic UI settings that remove unneeded elements to make Emacs look a lot more minimal and modern. 
 
 #+begin_src emacs-lisp
 
@@ -70,7 +72,7 @@ This section configures basic UI settings that remove unneeded elements to make 
   (dolist (mode '(org-mode-hook
                   term-mode-hook
                   shell-mode-hook
-	                treemacs-mode-hook
+	           treemacs-mode-hook
                   eshell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -92,16 +94,9 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] and [[https://f
 
 #+end_src
 
-** Split Windows Vertically by Default
-#+begin_src emacs-lisp
-;;(setq
-;;   split-width-threshold 0
-;;   split-height-threshold nil)
-#+end_src
-
 * Keybinding Configuration
 
-This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil-mode]] for a Vi-like modal editing experience.  [[https://github.com/noctuid/general.el][general.el]] is used for easy keybinding configuration that integrates well with which-key.  [[https://github.com/emacs-evil/evil-collection][evil-collection]] is used to automatically configure various Emacs modes with Vi-like keybindings for evil-mode.
+This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil-mode]] for a Vi-like modal editing experience.  [[https://github.com/noctuid/general.el][General.el]] is used for easy keybinding configuration that integrates well with which-key.  [[https://github.com/emacs-evil/evil-collection][evil-collection]] is used to automatically configure various Emacs modes with Vi-like keybindings for evil-mode.
 
 #+begin_src emacs-lisp
 
@@ -148,53 +143,46 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 
 ** Color Theme
 
-[[https://github.com/hlissner/emacs-doom-themes][doom-themes]] is a great set of themes with a lot of variety and support for many different Emacs modes.  Taking a look at the [[https://github.com/hlissner/emacs-doom-themes/tree/screenshots][screenshots]] might help you decide which one you like best.  You can also run =M-x counsel-load-theme= to choose between them easily.
+[[https://github.com/hlissner/emacs-doom-themes][Doom-themes]] is a great set of themes with a lot of variety and support for many different Emacs modes. You can also run =M-x counsel-load-theme= to choose between them easily.
 
 #+begin_src emacs-lisp
-
 (use-package doom-themes
   :init (load-theme 'doom-dracula t))
-
 #+end_src
 
 ** Better Modeline
 
-[[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a very attractive and rich (yet still minimal) mode line configuration for Emacs.  The default configuration is quite good but you can check out the [[https://github.com/seagle0128/doom-modeline#customize][configuration options]] for more things you can enable or disable.
+[[https://github.com/seagle0128/doom-modeline][Doom-modeline]] is a very attractive and rich (yet still minimal) mode line configuration for Emacs.  The default configuration is quite good but you can check out the [[https://github.com/seagle0128/doom-modeline#customize][configuration options]] for more things you can enable or disable.
 
-*NOTE:* The first time you load your configuration on a new machine, you'll need to run `M-x all-the-icons-install-fonts` so that mode line icons display correctly.
+*NOTE:* The first time you load your configuration on a new machine, you'll need to run =M-x all-the-icons-install-fonts= so that mode line icons display correctly.
 
 #+begin_src emacs-lisp
-
 (use-package all-the-icons)
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 15)))
-
 #+end_src
 
 ** Which Key
 
-[[https://github.com/justbur/emacs-which-key][which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
+[[https://github.com/justbur/emacs-which-key][Which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
 
 #+begin_src emacs-lisp
-
 (use-package which-key
   :init (which-key-mode)
   :diminish which-key-mode
   :config
   (setq which-key-idle-delay 1))
-
 #+end_src
 
 ** Ivy and Counsel
 
 [[https://oremacs.com/swiper/][Ivy]] is an excellent completion framework for Emacs.  It provides a minimal yet powerful selection menu that appears when you open files, switch buffers, and for many other tasks in Emacs.  Counsel is a customized set of commands to replace `find-file` with `counsel-find-file`, etc which provide useful commands for each of the default completion commands.
 
-[[https://github.com/Yevgnen/ivy-rich][ivy-rich]] adds extra columns to a few of the Counsel commands to provide more information about each item.
+[[https://github.com/Yevgnen/ivy-rich][Ivy-rich]] adds extra columns to a few of the Counsel commands to provide more information about each item.
 
 #+begin_src emacs-lisp
-
   (use-package ivy
     :diminish
     :bind (("C-s" . swiper)
@@ -223,15 +211,13 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 	   ("C-r" . 'counsel-minibuffer-history))
     :config
     (counsel-mode 1))
-
 #+end_src
 
 ** Helpful Help Commands
 
-[[https://github.com/Wilfred/helpful][Helpful]] adds a lot of very helpful (get it?) information to Emacs' =describe-= command buffers.  For example, if you use =describe-function=, you will not only get the documentation about the function, you will also see the source code of the function and where it gets used in other places in the Emacs configuration.  It is very useful for figuring out how things work in Emacs.
+[[https://github.com/Wilfred/helpful][Helpful]] adds a lot of very helpful information to Emacs' =describe-= command buffers.  For example, if you use =describe-function=, you will not only get the documentation about the function, you will also see the source code of the function and where it gets used in other places in the Emacs configuration.  It is very useful for figuring out how things work in Emacs.
 
 #+begin_src emacs-lisp
-
   (use-package helpful
     :custom
     (counsel-describe-function-function #'helpful-callable)
@@ -241,29 +227,11 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     ([remap describe-command] . helpful-command)
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
-
-#+end_src
-
-** Text Scaling
-
-This is an example of using [[https://github.com/abo-abo/hydra][Hydra]] to design a transient key binding for quickly adjusting the scale of the text on screen.  We define a hydra that is bound to =C-s t s= and, once activated, =j= and =k= increase and decrease the text scale.  You can press any other key (or =f= specifically) to exit the transient key map.
-
-#+begin_src emacs-lisp
-
-  (use-package hydra)
-
-  (defhydra hydra-text-scale (:timeout 4)
-    "scale text"
-    ("j" text-scale-increase "in")
-    ("k" text-scale-decrease "out")
-    ("f" nil "finished" :exit t))
-
-  (rune/leader-keys
-    "ts" '(hydra-text-scale/body :which-key "scale text"))
-
 #+end_src
 
 ** Full Screen
+
+Makes my emacs fullscreen on startup.
 #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+end_src
@@ -308,7 +276,7 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
 
 ** Basic Config
 
-This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates.  There's a lot to unpack in here so I'd recommend watching the videos for [[https://youtu.be/VcgjTEa0kU4][Part 5]] and [[https://youtu.be/PNE-mgkZ6HM][Part 6]] for a full explanation.
+This section contains the basic configuration for =org-mode= plus the configuration for Org agendas and capture templates. 
 
 #+begin_src emacs-lisp
 
@@ -467,14 +435,12 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 To execute or export code in =org-mode= code blocks, you'll need to set up =org-babel-load-languages= for each language you'd like to use.  [[https://orgmode.org/worg/org-contrib/babel/languages.html][This page]] documents all of the languages that you can use with =org-babel=.
 
 #+begin_src emacs-lisp
-
   (org-babel-do-load-languages
     'org-babel-load-languages
     '((emacs-lisp . t)
       (python . t)))
 
   (push '("conf-unix" . conf-unix) org-src-lang-modes)
-
 #+end_src
 
 ** Structure Templates
@@ -872,41 +838,43 @@ This is an example of configuring another non-Emacs application using org-mode. 
 * Org Roam
 
 #+begin_src emacs-lisp
-         (use-package org-roam
-           :straight t
-           :custom
-           (org-roam-directory "~/RoamNotes")
-           (org-roam-completion-everywhere t)
-           (org-roam-capture-templates
-            '(("d" "default" plain
-               "%?"
-               :if-new (file+head "${slug}.org" "#+title: ${title}\n#+date: %U\n")
-               :unnarrowed t)
+  (use-package org-roam
+    :straight t
+    :custom
+    (org-roam-directory "~/RoamNotes")
+    (org-roam-completion-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain
+        "%?"
+        :if-new (file+head "${slug}.org" "#+title: ${title}\n#+date: %U\n")
+        :unnarrowed t)
 
-              ("e" "equations" plain
-               "%?"
-               :if-new (file+head "${slug}.org" "#+title: ${title}\n#+date: %U\n#+STARTUP: latexpreview\n")
-               :unnarrowed t)
+       ("e" "equations" plain
+        "%?"
+        :if-new (file+head "${slug}.org" "#+title: ${title}\n#+date: %U\n#+STARTUP: latexpreview\n")
+        :unnarrowed t)
 
-              ("b" "book notes" plain
-               "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
-               :if-new (file+head "${slug}.org" "#+title: ${title}\n")
-               :unnarrowed t)
-              )
-            )
-           :bind (("C-c n l" . org-roam-buffer-toggle)
-                  ("C-c n f" . org-roam-node-find)
-                  ("C-c n i" . org-roam-node-insert)
-           :map org-mode-map
-                ("C-M-i"    . completion-at-point))
-           :config
-           (org-roam-setup))
+       ("b" "book notes" plain
+        "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+        :if-new (file+head "${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+       )
+     )
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n t" . org-roam-tag-add)
+           ("C-c n r" . org-roam-node-random)
+    :map org-mode-map
+         ("C-M-i"    . completion-at-point))
+    :config
+    (org-roam-setup))
 
-         ;;(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
-         ;;(load-library "org-roam-ui")
+  ;;(add-to-list 'load-path "~/.emacs.d/private/org-roam-ui")
+  ;;(load-library "org-roam-ui")
 
-         (setq browse-url-browser-function 'browse-url-generic
-               browse-url-generic-program "/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe")
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program "/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe")
 #+end_src
 
 * Org-roam-ui
@@ -924,6 +892,20 @@ This is an example of configuring another non-Emacs application using org-mode. 
           org-roam-ui-follow t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
+#+end_src
+
+* Deft
+
+#+begin_src emacs-lisp
+  (use-package deft
+     :straight t
+     :config
+     (setq deft-directory "~/RoamNotes/"
+           deft-recursive t
+           deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n"
+           deft-use-filename-as-title t)
+     :bind
+     ("C-c n d" . deft))
 #+end_src
 
 * DIRED
