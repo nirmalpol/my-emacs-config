@@ -1,81 +1,78 @@
 #+title: Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
-* Start-up 
-
-This file generates [[file:init.el][init.el]] which can be loaded by Emacs at startup.
-
-The following variables are used to tweak some of the configuration pieces for use in the live streams so you might need to adjust them for your local machine if you try to use this configuration directly.
-
+* Start Up
 #+begin_src emacs-lisp
-  ;; The default is 800 kilobytes.  Measured in bytes.
-  (setq gc-cons-threshold (* 50 1000 1000))
+;; The default is 800 kilobytes.  Measured in bytes.
+(setq gc-cons-threshold (* 50 1000 1000))
 
-  ;; Profile emacs startup
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              (message "*** Emacs loaded in %s with %d garbage collections."
-                       (format "%.2f seconds"
-                               (float-time
-                                (time-subtract after-init-time before-init-time)))
-                       gcs-done)))
+;; Profile emacs startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "*** Emacs loaded in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)))
 
-  (defvar efs/default-font-size 120)
-  (defvar efs/default-variable-font-size 120)
+(defvar efs/default-font-size 120)
+(defvar efs/default-variable-font-size 120)
 #+end_src
 
-* Install straight.el
-
-Instead of using the package.el manager that is typically used, I opted to use [[https://github.com/raxod502/straight.el][straight.el]] to manage my packages because it directly downloads the repos from github and brings them to my system where I can make any edits if I desire.
-
+* Straight
 #+begin_src emacs-lisp
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	(bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-	  (url-retrieve-synchronously
-	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	   'silent 'inhibit-cookies)
-	(goto-char (point-max))
-	(eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+   (defvar bootstrap-version)
+   (let ((bootstrap-file
+           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+          (bootstrap-version 5))
+     (unless (file-exists-p bootstrap-file)
+       (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
+     (load bootstrap-file nil 'nomessage))
 
-  (straight-use-package 'use-package)
-  (straight-use-package 'el-patch)
-  (setq straight-use-package-by-default t)
+   (straight-use-package 'use-package)
+   (straight-use-package 'el-patch)
+   (setq straight-use-package-by-default t)
 #+end_src
+                                         
+#+RESULTS:
+: t
 
 * Basic UI Configuration
-
+	
 This section configures basic UI settings that remove unneeded elements to make Emacs look a lot more minimal and modern. 
 
 #+begin_src emacs-lisp
 
-  (setq inhibit-startup-message t)
+    (setq inhibit-startup-message t)
 
-  (scroll-bar-mode -1)        ; Disable visible scrollbar
-  (tool-bar-mode -1)          ; Disable the toolbar
-  (tooltip-mode -1)           ; Disable tooltips
-  (set-fringe-mode 10)        ; Give some breathing room
+    (scroll-bar-mode -1)        ; Disable visible scrollbar
+    (tool-bar-mode -1)          ; Disable the toolbar
+    (tooltip-mode -1)           ; Disable tooltips
+    (set-fringe-mode 10)        ; Give some breathing room
 
-  (menu-bar-mode -1)            ; Disable the menu bar
+    (menu-bar-mode -1)            ; Disable the menu bar
 
-  ;; Set up the visible bell
-  (setq visible-bell t)
+    ;; Set up the visible bell
+    (setq visible-bell t)
 
-  (column-number-mode)
-  (global-display-line-numbers-mode t)
+    (column-number-mode)
+    (global-display-line-numbers-mode t)
 
-  ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook
-                  term-mode-hook
-                  shell-mode-hook
-	           treemacs-mode-hook
-                  eshell-mode-hook))
-    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+    ;; Disable line numbers for some modes
+    (dolist (mode '(org-mode-hook
+                    term-mode-hook
+                    shell-mode-hook
+                    treemacs-mode-hook
+                    eshell-mode-hook))
+      (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+    ;; Disabled line numbers for all modes
+  (setq display-line-numbers-type nil)
 #+end_src
 
 ** Font Configuration
@@ -83,15 +80,13 @@ This section configures basic UI settings that remove unneeded elements to make 
 I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] and [[https://fonts.google.com/specimen/Cantarell][Cantarell]] fonts for this configuration which will more than likely need to be installed on your machine.  Both can usually be found in the various Linux distro package managers or downloaded from the links above.
 
 #+begin_src emacs-lisp
-
-(set-face-attribute 'default nil :font "Fira Code Retina" :height efs/default-font-size)
+(set-face-attribute 'default nil :font "Fira Code Retina" :height 150)
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 120)
 
 ;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
-
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140 :weight 'regular)
 #+end_src
 
 * Keybinding Configuration
@@ -99,11 +94,12 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] and [[https://f
 This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil-mode]] for a Vi-like modal editing experience.  [[https://github.com/noctuid/general.el][General.el]] is used for easy keybinding configuration that integrates well with which-key.  [[https://github.com/emacs-evil/evil-collection][evil-collection]] is used to automatically configure various Emacs modes with Vi-like keybindings for evil-mode.
 
 #+begin_src emacs-lisp
-
   ;; Make ESC quit prompts
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
+  (global-set-key (kbd "TAB") 'self-insert-command)
+  
   (use-package general
+    :after evil
     :config
     (general-create-definer rune/leader-keys
       :keymaps '(normal insert visual emacs)
@@ -136,7 +132,6 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     :after evil
     :config
     (evil-collection-init))
-
 #+end_src
 
 * UI Configuration
@@ -146,22 +141,21 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 [[https://github.com/hlissner/emacs-doom-themes][Doom-themes]] is a great set of themes with a lot of variety and support for many different Emacs modes. You can also run =M-x counsel-load-theme= to choose between them easily.
 
 #+begin_src emacs-lisp
-(use-package doom-themes
-  :init (load-theme 'doom-dracula t))
+  (use-package doom-themes
+    :init (load-theme 'doom-dark+ t))
 #+end_src
 
 ** Better Modeline
-
 [[https://github.com/seagle0128/doom-modeline][Doom-modeline]] is a very attractive and rich (yet still minimal) mode line configuration for Emacs.  The default configuration is quite good but you can check out the [[https://github.com/seagle0128/doom-modeline#customize][configuration options]] for more things you can enable or disable.
 
 *NOTE:* The first time you load your configuration on a new machine, you'll need to run =M-x all-the-icons-install-fonts= so that mode line icons display correctly.
 
 #+begin_src emacs-lisp
-(use-package all-the-icons)
+  (use-package all-the-icons)
 
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 15)))
 #+end_src
 
 ** Which Key
@@ -169,11 +163,12 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 [[https://github.com/justbur/emacs-which-key][Which-key]] is a useful UI panel that appears when you start pressing any key binding in Emacs to offer you all possible completions for the prefix.  For example, if you press =C-c= (hold control and press the letter =c=), a panel will appear at the bottom of the frame displaying all of the bindings under that prefix and which command they run.  This is very useful for learning the possible key bindings in the mode of your current buffer.
 
 #+begin_src emacs-lisp
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
+  (use-package which-key
+    :defer 0
+    :diminish which-key-mode
+    :config
+    (which-key-mode)
+    (setq which-key-idle-delay 1))
 #+end_src
 
 ** Ivy and Counsel
@@ -186,32 +181,48 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
   (use-package ivy
     :diminish
     :bind (("C-s" . swiper)
-	   :map ivy-minibuffer-map
-	   ("TAB" . ivy-alt-done)
-	   ("C-l" . ivy-alt-done)
-	   ("C-j" . ivy-next-line)
-	   ("C-k" . ivy-previous-line)
-	   :map ivy-switch-buffer-map
-	   ("C-k" . ivy-previous-line)
-	   ("C-l" . ivy-done)
-	   ("C-d" . ivy-switch-buffer-kill)
-	   :map ivy-reverse-i-search-map
-	   ("C-k" . ivy-previous-line)
-	   ("C-d" . ivy-reverse-i-search-kill))
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
     :config
     (ivy-mode 1))
 
   (use-package ivy-rich
+    :after ivy
     :init
     (ivy-rich-mode 1))
 
   (use-package counsel
     :bind (("C-M-j" . 'counsel-switch-buffer)
-	   :map minibuffer-local-map
-	   ("C-r" . 'counsel-minibuffer-history))
+           :map minibuffer-local-map
+           ("C-r" . 'counsel-minibuffer-history))
     :config
     (counsel-mode 1))
 #+end_src
+
+** Prescient.el
+
+Helps sort Ivy completion candidates based on how recently or frequently you select them. This is helpful when using =M-x= to run commands that you don't have bound to a key but still need to access occasionally.
+
++begin_src emacs-lisp
+  (use-package ivy-prescient
+    :straight t
+    :after counsel
+    :custom
+    (ivy-prescient-enable-filtering nil)
+    :config
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1))
++end_src
 
 ** Helpful Help Commands
 
@@ -219,6 +230,7 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 
 #+begin_src emacs-lisp
   (use-package helpful
+    :commands (helpful-callable helpful-variable helpful-comman helpful-key)
     :custom
     (counsel-describe-function-function #'helpful-callable)
     (counsel-describe-variable-function #'helpful-variable)
@@ -245,7 +257,6 @@ Makes my emacs fullscreen on startup.
 The =efs/org-font-setup= function configures various text faces to tweak the sizes of headings and use variable width fonts in most cases so that it looks more like we're editing a document in =org-mode=.  We switch back to fixed width (monospace) fonts for code blocks and tables so that they display correctly.
 
 #+begin_src emacs-lisp
-
   (defun efs/org-font-setup ()
     ;; Replace list hyphen with dot
     (font-lock-add-keywords 'org-mode
@@ -271,7 +282,6 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
     (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-
 #+end_src
 
 ** Basic Config
@@ -285,9 +295,11 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (variable-pitch-mode 1)
     (visual-line-mode 1))
 
-  (use-package org 
+  (use-package org
+    ;;:commands (org-capture org-agenda)
     :hook (org-mode . efs/org-mode-setup)
     :config
+    (message "Org Mode is loaded!")
     (setq org-ellipsis " ▾")
 
     (setq org-agenda-start-with-log-mode t)
@@ -297,8 +309,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
     (setq org-agenda-files
         '("~/orgFolder/Current.org"
-          "~/orgFolder/projects/Brickio/Brickio.org"
-          ;;"~/orgFolder/projects/GreyLit/Greylit.org"
           "~/orgFolder/Habits.org"))
 
     (require 'org-habit)
@@ -406,14 +416,15 @@ This section contains the basic configuration for =org-mode= plus the configurat
 
 #+begin_src emacs-lisp
 
-  (use-package org-bullets
-    :after org
-    :hook (org-mode . org-bullets-mode)
-    :custom
-    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+      (use-package org-bullets
+        :hook (org-mode . org-bullets-mode)
+        :custom
+        (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
+  ;; Automatically change bullet type when indenting
+  (setq org-list-demote-modify-bullet
+            '(("+" . "*") ("*" . "-")("-" . "+")))
 #+end_src
-
 *** Center Org Buffers
 
 We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] to center =org-mode= buffers for a more pleasing writing experience as it centers the contents of the buffer horizontally to seem more like you are editing a document.  This is really a matter of personal preference so you can remove the block below if you don't like the behavior.
@@ -434,13 +445,18 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 
 To execute or export code in =org-mode= code blocks, you'll need to set up =org-babel-load-languages= for each language you'd like to use.  [[https://orgmode.org/worg/org-contrib/babel/languages.html][This page]] documents all of the languages that you can use with =org-babel=.
 
+The =with-eval-after-load= is a macro that causes a section of code to be executed only after a particular package gets loaded.
+
 #+begin_src emacs-lisp
   (org-babel-do-load-languages
-    'org-babel-load-languages
-    '((emacs-lisp . t)
-      (python . t)))
-
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (C . t)))
   (push '("conf-unix" . conf-unix) org-src-lang-modes)
+  (setq org-src-tab-acts-natively t)
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-babel-python-command "python3")
 #+end_src
 
 ** Structure Templates
@@ -451,14 +467,70 @@ You can add more =src= block templates below by copying one of the lines and cha
 
 #+begin_src emacs-lisp
 
-  ;; This is needed as of Org 9.2
-  (require 'org-tempo)
+    ;; This is needed as of Org 9.2
+    (with-eval-after-load 'org
+      (require 'org-tempo)
+      (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+      (add-to-list 'org-structure-template-alist '("py" . "src python"))
+      (add-to-list 'org-structure-template-alist '("cp" . "src C")))
 
-  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-  (add-to-list 'org-structure-template-alist '("py" . "src python"))
-
+  ;; set size of #+name tags for source blocks
+    (set-face-attribute 'org-meta-line nil :height 1.0 :slant 'normal)
 #+end_src
+
+The following code is to hide and display =#+begin= and =#+end= tags in the source blocks. To hide, call =M-x min-src-blocks= and to display, call =max-src-blocks=.
+
+#+begin_src emacs-lisp
+  (defun min-src-blocks()
+    (interactive)
+    (save-excursion (goto-char (point-max))
+                    (while (re-search-backward "#\\+BEGIN_SRC\\|#\\+END_SRC" nil t)
+                      (let ((ov (make-overlay (line-beginning-position) (1+(line-end-position)))))
+                        (overlay-put ov 'invisible t)))))
+
+  (defun max-src-blocks()
+    (interactive)
+    (remove-overlays))
+  
+  (set-face-attribute 'org-block nil :background
+  	              (color-darken-name
+                    (face-attribute 'default :background) 3))
+#+end_src
+
+The following is an example of passing data from one source block to another
+#+name: block-1
+#+BEGIN_SRC python :results output
+print(2)
+#+END_SRC
+
+#+RESULTS: block-1
+: 2
+
+#+name: block-2
+#+begin_src C :var receive_var=block-1()
+printf(receive_var);
+#+end_src
+
+#+RESULTS: block-2
+
+#+name: block-3
+#+begin_src python :var print_time=block-2() :results output
+print(print_time)
+#+end_src
+
+#+RESULTS: block-3
+: Sat May  7 19:52:07 2022
+
+
+#+begin_src C++ :includes <stdio.h>
+  int a=1;
+  int b=1;
+  printf("%d\n", a+b);
+#+end_src
+
+#+RESULTS:
+: 2
 
 ** Auto-tangle Configuration Files
 
@@ -476,6 +548,11 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
+#+end_src
+
+** Close Org Headers on Startup
+#+begin_src emacs-lisp
+(setq org-startup-folded t)
 #+end_src
 
 * Development
@@ -550,7 +627,8 @@ Try these commands with =M-x=:
 
 #+begin_src emacs-lisp
 
-  (use-package lsp-ivy)
+    (use-package lsp-ivy
+      :after lsp)
 
 #+end_src
 
@@ -563,7 +641,7 @@ Try these commands with =M-x=:
   ;; (lsp-enable-dap-auto-configure nil)
   ;; :config
   ;; (dap-ui-mode 1)
-
+  :commands dap-debug
   :config
   ;; Set up Node debugging
   (require 'dap-node)
@@ -614,6 +692,13 @@ This will install the [[https://github.com/theia-ide/typescript-language-server]
     (require 'dap-python))
 #+end_src
 
+#+begin_src emacs-lisp
+  (use-package pyvenv
+    :straight t
+    :after python-mode
+    :config
+    (pyvenv-mode 1))
+#+end_src
 ** Company Mode
 
 [[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
@@ -657,6 +742,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (setq projectile-switch-project-action #'projectile-dired))
 
   (use-package counsel-projectile
+    :after projectile
     :config (counsel-projectile-mode))
 
 #+end_src
@@ -667,14 +753,16 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+begin_src emacs-lisp
 
-  (use-package magit
-    :custom
-    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+    (use-package magit
+      :commands (magit-status magit-clone)
+      :custom
+      (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-  ;; NOTE: Make sure to configure a GitHub token before using this package!
-  ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
-  ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
-  ;;(use-package forge)
+    ;; NOTE: Make sure to configure a GitHub token before using this package!
+    ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
+    ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
+    ;;(use-package forge
+    ;;:after magit)
 
 #+end_src
 
@@ -699,7 +787,7 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
   :hook (prog-mode . rainbow-delimiters-mode))
 
 #+end_src
-
+	
 * Applications
 
 ** Some App
@@ -746,17 +834,7 @@ This is an example of configuring another non-Emacs application using org-mode. 
              (,(all-the-icons-octicon "mark-github" :height 1.1 :v-adjust 0.0)
               "Github"
               "Go to wondercast"
-              (lambda (&rest _) (browse-url "https://github.com/Maersk-Global/wondercast")))
-             ;; Codebase
-             (,(all-the-icons-faicon "briefcase" :height 1.1 :v-adjust -0.1)
-              "JIRA"
-              "Go to Kanban"
-              (lambda (&rest _) (browse-url "https://jira.maerskdev.net/secure/RapidBoard.jspa?rapidView=6378&projectKey=AVOC&quickFilter=15697")))
-             ;; Perspectives
-             (,(all-the-icons-octicon "history" :height 1.1 :v-adjust 0.0)
-              "Restore"
-              "Restore"
-              (lambda (&rest _) (persp-state-load persp-state-default-file)))
+              (lambda (&rest _) (browse-url "https://github.com/nirmalpol")))
              )))
     (defun lc/dashboard-agenda-entry-format ()
       "Format agenda entry to show it on dashboard. Compared to the original, we remove tags at the end"
@@ -809,7 +887,7 @@ This is an example of configuring another non-Emacs application using org-mode. 
 
   (defun window-split-toggle ()
     "Toggle between horizontal and vertical split with two windows."
-    ;;(interactive)
+    (interactive)
     (if (> (length (window-list)) 2)
         (error "Can't toggle with more than 2 windows!")
       (let ((func (if (window-full-height-p)
@@ -829,16 +907,17 @@ This is an example of configuring another non-Emacs application using org-mode. 
 * Org Download
 
 #+begin_src emacs-lisp
-  ;; sudo apt-get install xclip
-  (use-package org-download
-      :straight t)
-  (setq-default org-download-image-dir "~/RoamNotes/images/machineLearning/")
+    ;; sudo apt-get install xclip
+    (use-package org-download
+        :straight t
+        :after org)
+    (setq-default org-download-image-dir "~/RoamNotes/images/machineLearning/")
 #+end_src
 
 * Org Roam
 
 #+begin_src emacs-lisp
-  (use-package org-roam
+      (use-package org-roam
     :straight t
     :custom
     (org-roam-directory "~/RoamNotes")
@@ -875,7 +954,52 @@ This is an example of configuring another non-Emacs application using org-mode. 
 
   (setq browse-url-browser-function 'browse-url-generic
         browse-url-generic-program "/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe")
+
+  (setq org-roam-node-display-template
+        (concat "${title:*} "
+                (propertize "${tags:30}" 'face 'org-tag)))
 #+end_src
+        
+#+RESULTS:
+: ${title:*} ${tags:30}
+
+* Org-roam-bibtex
+
+
+#+begin_src emacs-lisp
+  (use-package org-ref
+    :straight t)
+
+  (define-key org-mode-map (kbd "C-c ]") org-ref-insert-cite-function)
+  (define-key org-mode-map (kbd "C-c r") org-ref-insert-ref-function)
+  (define-key org-mode-map (kbd "C-c l") org-ref-insert-label-function)
+#+end_src
+
+#+RESULTS:
+: org-ref-insert-label-link
+
+#+begin_src emacs-lisp
+  (use-package ivy-bibtex
+    :straight t)
+
+  ;; ivy-bibtex requires ivy's `ivy--regex-ignore-order` regex builder, which
+  ;; ignores the order of regexp tokens when searching for matching candidates.
+  ;; Add something like this to your init file:
+  (setq ivy-re-builders-alist
+        '((ivy-bibtex . ivy--regex-ignore-order)
+          (t . ivy--regex-plus)))
+
+#+end_src
+#+RESULTS:
+: ((ivy-bibtex . ivy--regex-ignore-order) (t . ivy--regex-plus))
+
+#+begin_src emacs-lisp
+  (use-package org-roam-bibtex
+    :straight t
+    :after org-roam)
+#+end_src
+
+#+RESULTS:
 
 * Org-roam-ui
 
@@ -896,45 +1020,63 @@ This is an example of configuring another non-Emacs application using org-mode. 
 
 * Deft
 
+Search through a folder for specific words or sentences. Need to specify which directory you want to parse by setting its path in =my/def-dir-list= below.
+
 #+begin_src emacs-lisp
   (use-package deft
-     :straight t
-     :config
-     (setq deft-directory "~/RoamNotes/"
-           deft-recursive t
-           deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n"
-           deft-use-filename-as-title t)
-     :bind
-     ("C-c n d" . deft))
+       :straight t
+       :config
+       (setq deft-directory "~/RoamNotes/"
+             deft-recursive t
+             deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n"
+             deft-use-filename-as-title t)
+       :bind
+       ("C-c n d" . deft))
+    
+    ;; Setup my list of deft directories
+  (defvar my/deft-dir-list '()
+    "A list of deft directories to pick")
+
+  (setq my/deft-dir-list '("~/RoamNotes/"
+                           "~/.emacs.d/straight/"
+                           ))
+
+  (defun my/pick-deft-dir ()
+    "Select directories from a list"
+    (interactive)
+    (setq deft-directory 
+          (ido-completing-read "Select directory: " my/deft-dir-list))
+    (deft-refresh))
 #+end_src
 
 * DIRED
 
  #+begin_src emacs-lisp
 
-   (use-package dired
-     :straight nil
-     :commands (dired dired-jump)
-     :bind (("C-x C-j" . dired-jump))
-     :custom ((dired-listing-switches "-agho --group-directories-first"))
-     :config
-     (evil-collection-define-key 'normal 'dired-mode-map
-       "h" 'dired-single-up-directory
-       "l" 'dired-single-buffer))
+      (use-package dired
+        :straight nil
+        :commands (dired dired-jump)
+        :bind (("C-x C-j" . dired-jump))
+        :custom ((dired-listing-switches "-agho --group-directories-first"))
+        :config
+        (evil-collection-define-key 'normal 'dired-mode-map
+          "h" 'dired-single-up-directory
+          "l" 'dired-single-buffer))
 
-   ;; Only have one DIRED buffer open at a time
-   (use-package dired-single)
+      ;; Only have one DIRED buffer open at a time
+      (use-package dired-single
+        :commands (dired dired-jump))
 
-   ;; Show icons for file types
-   (use-package all-the-icons-dired
-     :hook (dired-mode . all-the-icons-dired-mode))
+      ;; Show icons for file types
+      (use-package all-the-icons-dired
+        :hook (dired-mode . all-the-icons-dired-mode))
 
-   ;; Show hidden files using H
-   (use-package dired-hide-dotfiles
-     :hook (dired-mode . dired-hide-dotfiles-mode)
-     :config
-     (evil-collection-define-key 'normal 'dired-mode-map
-       "H" 'dired-hide-dotfiles-mode))
+      ;; Show hidden files using H
+      (use-package dired-hide-dotfiles
+        :hook (dired-mode . dired-hide-dotfiles-mode)
+        :config
+        (evil-collection-define-key 'normal 'dired-mode-map
+          "H" 'dired-hide-dotfiles-mode))
 
 #+end_src
 
@@ -1045,46 +1187,47 @@ If you're done with a particular perspective, you can "kill" it using persp-kill
 * LaTex stuff
 
 #+begin_src emacs-lisp
-  (setq org-latex-create-formula-image-program 'dvipng)
-  (plist-put org-format-latex-options :justify 'center)
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+  (with-eval-after-load 'org
+    (setq org-latex-create-formula-image-program 'dvipng)
+    (plist-put org-format-latex-options :justify 'center)
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 
-  (defun org-justify-fragment-overlay (beg end image imagetype)
-    "Adjust the justification of a LaTeX fragment.
-  The justification is set by :justify in
-  `org-format-latex-options'. Only equations at the beginning of a
-  line are justified."
-    (cond
-     ;; Centered justification
-     ((and (eq 'center (plist-get org-format-latex-options :justify)) 
-           (= beg (line-beginning-position)))
-      (let* ((img (create-image image 'imagemagick t))
-             (width (car (image-size img)))
-             (offset (floor (- (/ (window-text-width) 2) (/ width 2)))))
-        (overlay-put (ov-at) 'before-string (make-string offset ? ))))
-     ;; Right justification
-     ((and (eq 'right (plist-get org-format-latex-options :justify)) 
-           (= beg (line-beginning-position)))
-      (let* ((img (create-image image 'imagemagick t))
-             (width (car (image-display-size (overlay-get (ov-at) 'display))))
-             (offset (floor (- (window-text-width) width (- (line-end-position) end)))))
-        (overlay-put (ov-at) 'before-string (make-string offset ? ))))))
+    (defun org-justify-fragment-overlay (beg end image imagetype)
+      "Adjust the justification of a LaTeX fragment.
+    The justification is set by :justify in
+    `org-format-latex-options'. Only equations at the beginning of a
+    line are justified."
+      (cond
+       ;; Centered justification
+       ((and (eq 'center (plist-get org-format-latex-options :justify)) 
+             (= beg (line-beginning-position)))
+        (let* ((img (create-image image 'imagemagick t))
+               (width (car (image-size img)))
+               (offset (floor (- (/ (window-text-width) 2) (/ width 2)))))
+          (overlay-put (ov-at) 'before-string (make-string offset ? ))))
+       ;; Right justification
+       ((and (eq 'right (plist-get org-format-latex-options :justify)) 
+             (= beg (line-beginning-position)))
+        (let* ((img (create-image image 'imagemagick t))
+               (width (car (image-display-size (overlay-get (ov-at) 'display))))
+               (offset (floor (- (window-text-width) width (- (line-end-position) end)))))
+          (overlay-put (ov-at) 'before-string (make-string offset ? ))))))
 
-  (defun org-latex-fragment-tooltip (beg end image imagetype)
-    "Add the fragment tooltip to the overlay and set click function to toggle it."
-    (overlay-put (ov-at) 'help-echo
-                 (concat (buffer-substring beg end)
-                         "mouse-1 to toggle."))
-    (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
-                                      (define-key map [mouse-1]
-                                        `(lambda ()
-                                           (interactive)
-                                           (org-remove-latex-fragment-image-overlays ,beg ,end)))
-                                      map)))
+    (defun org-latex-fragment-tooltip (beg end image imagetype)
+      "Add the fragment tooltip to the overlay and set click function to toggle it."
+      (overlay-put (ov-at) 'help-echo
+                   (concat (buffer-substring beg end)
+                           "mouse-1 to toggle."))
+      (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
+                                        (define-key map [mouse-1]
+                                          `(lambda ()
+                                             (interactive)
+                                             (org-remove-latex-fragment-image-overlays ,beg ,end)))
+                                        map)))
 
-  ;; advise the function to a
-  (advice-add 'org--format-latex-make-overlay :after 'org-justify-fragment-overlay)
-  (advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
+    ;; advise the function to a
+    (advice-add 'org--format-latex-make-overlay :after 'org-justify-fragment-overlay)
+    (advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip))
 #+end_src
 
 
@@ -1119,32 +1262,126 @@ Then, in your .org file, if you have
 / [~/images/example1.jpg] 
 
 then the image will be displayed in preview at width 249px. For another image, where no +attr_* is specified, the default width of 550px will be applied.
-* (Outdated) Package System Setup
+* Runtime Performance
+Dial the garbage collector threshold back down so that the garbage collection happens more frequently but in less time.
+#+begin_src emacs-lisp
+  ;; Make gc pauses faster by decreasing the threshold
+  (setq gc-cons-threshold (* 2 1000 1000))
+#+end_src
 
-Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+* Ivy-posframe
 
-+begin_src emacs-lisp
-    ;; Initialize package sources
-    (require 'package)
+Makes the modeline for =M-x= command pop up in the center of the screen.
 
-    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                             ("gnu" . "https://elpa.gnu.org/packages/")
-                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")
-                             ;;("org" . "https://orgmode.org/elpa/")
-                             ("elpa" . "https://elpa.gnu.org/packages/")))
+#+begin_src emacs-lisp
 
-    (package-initialize)
-    (unless package-archive-contents
-      (package-refresh-contents))
+  (use-package ivy-posframe
+    :straight t)
 
-    ;;(assq-delete-all 'org package--builtins)
-    ;;(assq-delete-all 'org package--builtin-versions)
+  (require 'ivy-posframe)
+  ;; Different command can use different display function.
+  (setq ivy-posframe-height-alist '((swiper . 10)
+                                    (t      . 10)))
 
-    ;; Initialize use-package on non-Linux platforms
-    (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
+  (setq ivy-posframe-display-functions-alist
+        '((swiper          . ivy-display-function-fallback)
+          (complete-symbol . ivy-posframe-display-at-point)
+          (counsel-M-x     . ivy-posframe-display-at-window-center)
+          (t               . ivy-posframe-display)))
+  (ivy-posframe-mode 1)
 
-    (require 'use-package)
-    (setq use-package-always-ensure t)
-+end_src
+    (setq ivy-posframe-parameters
+        '((left-fringe . 1)
+          (right-fringe . 1)))
+
+  (set-face-attribute 'ivy-posframe nil :foreground "#00ffff" :background "#181818")
+  (set-face-attribute 'ivy-posframe-border nil :foreground "white" :background "black")
+  (setq ivy-posframe-border-width 3)
+#+end_src
+
+* Dimmer
+
+#+begin_src emacs-lisp
+   (use-package dimmer
+  :straight t)
+     (require 'dimmer)
+      (dimmer-configure-which-key)
+      (dimmer-configure-helm)
+      (dimmer-mode t)
+  (setq dimmer-fraction 0.4)
+#+end_src
+
+* Beacon
+
+Never lose sight of your cursor as you move from one buffer to the next.
+#+begin_src emacs-lisp
+    (use-package beacon
+  :straight t)
+    (beacon-mode 1)
+#+end_src
+
+* Org-Fragtog
+
+#+begin_src emacs-lisp
+  (use-package org-fragtog
+        :straight t)
+  (add-hook 'org-mode-hook #'org-fragtog-mode)
+#+end_src
+
+* Resize Org Inline Images
+
+#+begin_src emacs-lisp
+(setq org-image-actual-width nil)
+#+end_src
+
+You can use this for inline previews of JPGs and PNGs.
+#+ATTR_ORG: :width 100
+[~/images/example.svg]
+
+If you want to size this for both inline previews and html output:
+#+ATTR_HTML: width="100px"
+#+ATTR_ORG: :width 100
+[./images/example.svg]
+
+* Org-Modern
+
+#+begin_src emacs-lisp
+    (use-package org-modern
+  :straight t)
+    ;; Add frame borders and window dividers
+(modify-all-frames-parameters
+ '((right-divider-width . 40)
+   (internal-border-width . 20)))
+(dolist (face '(window-divider
+                window-divider-first-pixel
+                window-divider-last-pixel))
+  (face-spec-reset-face face)
+  (set-face-foreground face (face-attribute 'default :background)))
+(set-face-background 'fringe (face-attribute 'default :background))
+
+(setq
+ ;; Edit settings
+ org-auto-align-tags nil
+ org-tags-column 0
+ org-catch-invisible-edits 'show-and-error
+ org-special-ctrl-a/e t
+ org-insert-heading-respect-content t
+
+ ;; Org styling, hide markup etc.
+ org-hide-emphasis-markers t
+ org-pretty-entities t
+ org-ellipsis ""
+
+ ;; Agenda styling
+ org-agenda-block-separator ?-
+ org-agenda-time-grid
+ '((daily today require-timed)
+   (800 1000 1200 1400 1600 1800 2000)
+   " ????? " "???????????????")
+ org-agenda-current-time-string
+ "? now -------------------------------------------------")
+
+(global-org-modern-mode)
+#+end_src
+
 
